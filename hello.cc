@@ -19,7 +19,7 @@ int main(void){
 	
 	libglx.init(d);
 	libglx.get_version();
-
+	libglx.get_framebuffers();
 	if (d==NULL){
 		std::cout << "no screen error" << std::endl;
 		exit(1);

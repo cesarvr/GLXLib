@@ -33,10 +33,17 @@ static int visual_attribs[] =
 class GLXLib {
 private:
 	Display *display;
+	GLXFBConfig glx_config;	
+	
+	int frame_buffer;
+	int current_sampler;
+	void get_framebuffers();
 public:
 	GLXLib();
+	
 	void init( Display *d );
 	void get_version();
+	
 };
 
 #endif //GLX_ENGINE_H_
