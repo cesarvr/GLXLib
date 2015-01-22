@@ -1,9 +1,11 @@
 #include <cassert>
+#include <unistd.h>
 #include "glx_engine.h"
 
 GLXLib::GLXLib(){
 	frame_buffer 	=-1;
 	current_sampler =-1;
+  	gl_context 	= 0;
 }
 
 
@@ -58,4 +60,80 @@ void GLXLib::get_framebuffers() {
 
 	// Be sure to free the FBConfig list allocated by glXChooseFBConfig()
 	XFree( fbc );
-} 
+}
+
+void GLXLib::set_window_title( std::string name )
+	XStoreName( display, window, name.c_str() );
+}
+
+void GLXLib::swap_buffer() {
+	GLXSwapBuffers( display, window );
+}
+
+void GLXLib::create_window( int x, int y, int x2, int y2 ) {
+
+	get_framebuffers();
+	XVisualInfo *vi = glXGetVisualFromFBConfig( display, glx_config );
+
+	XSetWindowAttributes swa; 
+	Colormap cmap;
+	swa.colormap = cmap = XCreateColormap( display,RootWindow( display, vi->screen ), vi->visual, AllocNone );
+	
+	swa.background_pixmap = None ;
+	swa.border_pixel      = 1;
+     	swa.event_mask        = StructureNotifyMask;
+	
+	Window window = XCreateWindow( display, RootWindow( display, vi->screen ), 
+	                            x, y, x2, y2, 0, vi->depth, InputOutput, 
+				    vi->visual, CWBorderPixel|CWColormap|CWEventMask, &swa );
+	
+	assert(window !== NULL);	
+	XFree( vi );
+	
+	set_window_title("OpenGL xCesarx");
+	XMapWindow( display, window );
+
+	gl_context = glXCreateNewContext( display, glx_config, GLX_RGBA_TYPE, 0, True );
+ 	XSync( display, False );
+
+	if ( ! glXIsDirect ( display, gl_context ) )
+	{
+		std::cout <<  "Indirect GLX rendering context obtained\n" << std::endl;
+	}
+	else
+	{
+		std::cout << "Direct GLX rendering context obtained\n" << std::endl
+	}
+	
+	std::cout << "Making context current\n" << std::endl;
+	glXMakeCurrent( display, window, gl_context );
+
+	glClearColor( 0, 0.5, 1, 1 );
+	glClear( GL_COLOR_BUFFER_BIT );
+	glXSwapBuffers ( display, windown );
+	     
+	sleep( 1 );
+	        
+	glClearColor ( 1, 0.5, 0, 1 );
+	glClear ( GL_COLOR_BUFFER_BIT );
+	swap_buffer();
+
+	sleep( 1 );
+			  
+	glXMakeCurrent( display, 0, 0 );
+	swap_buffer();
+			       
+}
+
+void GLXLib::exit() {
+	XDestroyWindow( display, win );
+	XFreeColormap( display, cmap );
+     	XCloseDisplay( display );
+}
+
+
+
+
+
+
+

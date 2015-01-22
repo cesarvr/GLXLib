@@ -38,7 +38,6 @@ int main(void){
 		if (e.type == Expose) {
 			XFillRectangle(d, w, DefaultGC(d, s), 20, 20, 10, 10);
 			XDrawString(d, w, DefaultGC(d, s), 10, 50, msg.c_str(), msg.length() );
-
 			XDrawString(d, RootWindow(d,s), DefaultGC(d,s), 20, 50, msg.c_str(), msg.length() );
 		}
 		
